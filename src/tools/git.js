@@ -1,6 +1,7 @@
-const download = require('download-git-repo');
-const request = require('./request');
-const { orgName } = require('../../config');
+const download = require("download-git-repo");
+const request = require("./request");
+const { orgName, baseURL } = require("../../config");
+const exec = require("child_process").exec;
 
 class Git {
   constructor() {
@@ -11,15 +12,15 @@ class Git {
    * 获取项目组中的项目模板列表
    */
   getProjectList() {
-    return request(`/orgs/${this.orgName}/repos`);
+    return request(`/groups/${this.orgName}`);
   }
 
   /**
    * 获取项目模板的版本列表
-   * @param {String} repo 项目名称
+   * @param {String} repoId 项目id
    */
-  getProjectVersions(repo) {
-    return request(`/repos/${this.orgName}/${repo}/tags`);
+  getProjectVersions(repoId) {
+    return request(`/projects/${repoId}/repository/tags`);
   }
 
   /**
@@ -28,10 +29,38 @@ class Git {
    */
   downloadProject({ repo, version, repoPath }) {
     return new Promise((resolve, reject) => {
-      download(`${this.orgName}/${repo}#${version}`, repoPath, (err) => {
-        if (err) reject(err);
-        resolve(true);
-      });
+      download(
+        `${baseURL}:${this.orgName}/${repo}#${version}`,
+        repoPath,
+        { clone: true },
+        err => {
+          if (err) reject(err);
+          resolve(true);
+        }
+      );
+    });
+  }
+  /**
+   * 下载到当前目录
+   */
+  downloadProjectCurrent({ repo, version }) {
+    return new Promise((resolve, reject) => {
+      exec(
+        `git clone --branch ${version} ${baseURL}/${this.orgName}/${repo}.git .`,
+        function(err) {
+          if (err) {
+            if (err.code == 128) {
+              reject(
+                "destination path '.' already exists and is not an empty directory"
+              );
+            } else {
+              reject(`error: ${err.cmd}`);
+            }
+          } else {
+            resolve(true);
+          }
+        }
+      );
     });
   }
 }

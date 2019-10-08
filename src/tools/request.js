@@ -1,8 +1,8 @@
 const axios = require('axios');
-const { baseURL } = require('../../config');
+const { baseURL, basePrefix } = require('../../config');
 
 const instance = axios.create({
-  baseURL,
+  baseURL: baseURL + basePrefix,
   timeout: 6e4,
 });
 
