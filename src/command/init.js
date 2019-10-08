@@ -44,7 +44,7 @@ class Download {
         ])
         .then(({ currentPath }) => {
           if (!currentPath) return;
-          this.targetPath = '';
+          this.targetPath = "";
           this.download();
         });
     } else {
@@ -129,16 +129,23 @@ class Download {
     try {
       downLoadLoad = this.downLoad.start();
       if (this.targetPath) {
-        await this.git.downloadProject({ repo, version, repoPath: this.targetPath });
+        await this.git.downloadProject({
+          repo,
+          version,
+          repoPath: this.targetPath
+        });
       } else {
         await this.git.downloadProjectCurrent({
-          repo, version
-        })
+          repo,
+          version
+        });
       }
-     
+
       downLoadLoad.succeed("下载代码成功");
       console.log("\n To get started");
-      console.log(`\n ${this.targetPath ? 'cd ${this.targetPath} & ' : ''}npm i \n`);
+      console.log(
+        `\n ${this.targetPath ? `cd ${this.targetPath} & ` : ""}npm i \n`
+      );
     } catch (error) {
       console.log(error);
       downLoadLoad.fail("下载代码失败...");
